@@ -35,8 +35,20 @@ def ingest_data():
             source = entry.get('source', 'unknown_source')
             chunk_id = entry.get('chunk_id', -1)
 
-            # Quality Check: Skip empty or extremely short chunks (noise)
-            if len(text_content) < 50:
+            # --- QUALITY FILTERS (ADD THIS) ---
+
+            # 1. Skip Table of Contents (Too many dots or specific headers)
+            if "Table of Contents" in text_content or text_content.count(".....") > 3:
+                print(f"Skipping TOC: {chunk_id}")
+                continue
+
+            # 2. Skip Copyright/Legal boilerplate (Low value)
+            if "All rights reserved" in text_content and len(text_content) < 300:
+                print(f"Skipping Copyright: {chunk_id}")
+                continue
+
+            # 3. Skip very short chunks (Usually page footers or headers)
+            if len(text_content) < 100:
                 continue
 
             # Create a clean JSON object
