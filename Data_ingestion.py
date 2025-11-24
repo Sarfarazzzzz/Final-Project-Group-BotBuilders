@@ -11,16 +11,16 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def ingest_data():
-    print("🚀 Starting Data Ingestion Pipeline...")
+    print("Starting Data Ingestion Pipeline...")
 
     # 1. Download the Dataset
     # We use 'semihk1' because it contains 2025 AWS User Guide PDFs (High Quality)
-    print("📥 Downloading `semihk1/aws-public-pdf-chunked-dataset`...")
+    print("Downloading `semihk1/aws-public-pdf-chunked-dataset`...")
     try:
         dataset = load_dataset("semihk1/aws-public-pdf-chunked-dataset", split="train")
-        print(f"✅ Download Complete. Total Raw Chunks: {len(dataset)}")
+        print(f"Download Complete. Total Raw Chunks: {len(dataset)}")
     except Exception as e:
-        print(f"❌ Error downloading dataset: {e}")
+        print(f"Error downloading dataset: {e}")
         return
 
     # 2. Process and Format
@@ -53,8 +53,8 @@ def ingest_data():
             f.write(json.dumps(doc_object) + '\n')
             processed_count += 1
 
-    print(f"🎉 Success! Processed {processed_count} high-quality chunks.")
-    print(f"📂 Data saved to: {OUTPUT_FILE}")
+    print(f"Success! Processed {processed_count} high-quality chunks.")
+    print(f" Data saved to: {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
