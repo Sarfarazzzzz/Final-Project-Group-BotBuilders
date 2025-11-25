@@ -17,7 +17,7 @@ BM25_FILE = "db/bm25_index.pkl"
 def create_embeddings():
     # Check for GPU
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"🚀 Starting Embedding Pipeline on device: {device.upper()}")
+    print(f"Starting Embedding Pipeline on device: {device.upper()}")
 
     if device == "cpu":
         print("WARNING: Running on CPU. This will be slow. Use a GPU instance if possible.")
