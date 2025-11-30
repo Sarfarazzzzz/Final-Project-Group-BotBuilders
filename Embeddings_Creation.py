@@ -3,7 +3,7 @@ import os
 import pickle
 import torch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from rank_bm25 import BM25Okapi
