@@ -1,136 +1,114 @@
-import json
-import os
-import torch
-import gc
-import random
-import numpy as np
-import warnings
-from tqdm import tqdm
-from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
+import streamlit as st
+import time
+from backend import RAGBackend
 
-warnings.filterwarnings("ignore")
+# Page Config
+st.set_page_config(
+    page_title="AWS Architect Assistant",
+    page_icon="☁️",
+    layout="wide"
+)
 
-# Configuration
-INPUT_FILE = "data/aws_docs_2025.jsonl"
-DB_DIR = "db/chroma_db"
-BATCH_SIZE = 500
+# Custom CSS for a professional look
+st.markdown("""
+<style>
+    .chat-message {
+        padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
+    }
+    .chat-message.user {
+        background-color: #2b313e; color: #ffffff
+    }
+    .chat-message.bot {
+        background-color: #f0f2f6; color: #000000
+    }
+    .source-box {
+        font-size: 0.9em; color: #444; border-left: 3px solid #ff9900; 
+        padding-left: 10px; margin-top: 5px; background-color: #f9f9f9; padding: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Title
+col1, col2 = st.columns([1, 6])
+with col1:
+    # Use HTML to render the image directly in the browser (bypassing the server backend)
+    st.markdown('<img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" width="80">', unsafe_allow_html=True)
+with col2:
+    st.title("AWS Technical Architect Agent")
+    st.markdown("*Powered by Hybrid RAG (Dense Vectors + BM25) & Qwen-7B*")
 
 
-def final_repair():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"🚀 Starting Robust Ghost Repair on {device.upper()}...")
+# Initialize Backend (Cached)
+@st.cache_resource
+def get_backend():
+    backend = RAGBackend()
+    backend.load_resources()
+    return backend
 
-    # 1. Load Raw Data counts
-    print("📂 Analyzing Raw Data Source...")
-    raw_docs_by_source = {}
-    with open(INPUT_FILE, 'r', encoding='utf-8') as f:
-        for line in f:
-            data = json.loads(line)
-            source = data['metadata'].get('source', 'unknown')
-            if source not in raw_docs_by_source:
-                raw_docs_by_source[source] = []
-            raw_docs_by_source[source].append(Document(page_content=data['text'], metadata=data['metadata']))
 
-    print(f"✅ Raw Dataset has {len(raw_docs_by_source)} unique files.")
-
-    # 2. Connect to DB
-    print("🔌 Connecting to Database...")
-    embedding_model = HuggingFaceEmbeddings(
-        model_name="BAAI/bge-m3",
-        model_kwargs={"device": device},
-        encode_kwargs={"normalize_embeddings": True}
-    )
-    vector_db = Chroma(persist_directory=DB_DIR, embedding_function=embedding_model)
-
-    # 3. IDENTIFY GHOSTS (With Error Handling)
-    print("🔍 Performing Deep Vector Integrity Scan...")
-    corrupt_sources = []
-
+# Load the brain
+with st.spinner("🚀 Booting up GPU Engine & Loading Knowledge Base..."):
     try:
-        db_data = vector_db.get()
-        all_ids = db_data['ids']
-        all_metadatas = db_data['metadatas']
+        backend = get_backend()
+        st.success("System Online!")
     except Exception as e:
-        print(f"❌ Critical DB Read Error: {e}")
-        print("⚠️ Assuming Database is totally corrupt. Re-ingesting everything.")
-        all_ids = []
-        all_metadatas = []
+        st.error(f"Error Loading System: {e}")
+        st.stop()
 
-    # Map Source -> List of IDs
-    db_map = {}
-    for idx, meta in enumerate(all_metadatas):
-        if meta and 'source' in meta:
-            src = meta['source']
-            if src not in db_map:
-                db_map[src] = []
-            db_map[src].append(all_ids[idx])
+# Session State
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    # Check every source
-    for source, raw_docs in tqdm(raw_docs_by_source.items(), desc="Scanning Files"):
-        is_corrupt = False
-        reason = ""
+# Display History
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+        if "sources" in message:
+            with st.expander("📚 View Sources"):
+                for src in message["sources"]:
+                    st.markdown(f"<div class='source-box'><b>📄 {src['source']}</b><br><i>{src['content']}</i></div>",
+                                unsafe_allow_html=True)
 
-        db_ids = db_map.get(source, [])
+# User Input
+if prompt := st.chat_input("Ask a technical question (e.g., 'How do I create an S3 bucket?')"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-        # Check 1: Count Mismatch
-        if len(db_ids) < len(raw_docs):
-            is_corrupt = True
-            reason = f"Missing Chunks (Raw: {len(raw_docs)}, DB: {len(db_ids)})"
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
 
-        # Check 2: Vector Sampling (The Crash Prone Part)
-        elif len(db_ids) > 0:
+        with st.spinner("Thinking..."):
             try:
-                sample_ids = random.sample(db_ids, min(3, len(db_ids)))
-                # We wrap this in TRY/CATCH to handle the "InternalError"
-                sample_data = vector_db.get(ids=sample_ids, include=['embeddings'])
-                embeddings = sample_data['embeddings']
+                response_text, source_docs = backend.generate_answer(prompt)
 
-                for emb in embeddings:
-                    if emb is None or len(emb) == 0 or np.sum(np.abs(emb)) < 1e-6:
-                        is_corrupt = True
-                        reason = "Ghost Vectors (Empty/Zero Data)"
-                        break
+                # Streaming Effect
+                for chunk in response_text.split():
+                    full_response += chunk + " "
+                    time.sleep(0.02)
+                    message_placeholder.markdown(full_response + "▌")
+                message_placeholder.markdown(full_response)
+
+                # Format Sources
+                clean_sources = []
+                for doc in source_docs[:3]:
+                    clean_sources.append({
+                        "source": doc.metadata.get("source", "AWS Docs"),
+                        "content": doc.page_content[:300] + "..."
+                    })
+
+                with st.expander("📚 View Sources"):
+                    for src in clean_sources:
+                        st.markdown(
+                            f"<div class='source-box'><b>📄 {src['source']}</b><br><i>{src['content']}</i></div>",
+                            unsafe_allow_html=True)
+
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": full_response,
+                    "sources": clean_sources
+                })
+
             except Exception as e:
-                # THIS CATCHES YOUR ERROR
-                is_corrupt = True
-                reason = f"DB Integrity Crash: {str(e)[:50]}..."
-
-        if is_corrupt:
-            # print(f"   ❌ DETECTED GHOST: {source} | Reason: {reason}")
-            corrupt_sources.append(source)
-
-    if len(corrupt_sources) == 0:
-        print("🎉 SUCCESS: No ghost files found.")
-        return
-
-    print(f"\n⚠️ Found {len(corrupt_sources)} broken files. Repairing now...")
-
-    # 4. REPAIR LOOP
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-
-    for source in tqdm(corrupt_sources, desc="Repairing Ghosts"):
-        # Step A: Delete (Try to clean up, but ignore errors if index is broken)
-        try:
-            vector_db._collection.delete(where={"source": source})
-        except:
-            pass  # If delete fails, we just overwrite
-
-        # Step B: Re-ingest
-        raw_docs = raw_docs_by_source[source]
-        splitted_docs = text_splitter.split_documents(raw_docs)
-
-        for i in range(0, len(splitted_docs), BATCH_SIZE):
-            batch = splitted_docs[i: i + BATCH_SIZE]
-            vector_db.add_documents(documents=batch)
-
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    print("✅ All Ghosts Busted! Database is fully synced.")
-
-
-if _name_ == "_main_":
-    final_repair()
+                st.error(f"Error: {e}")
