@@ -129,3 +129,10 @@ CloudGuide correctly infers:
 ```bash
 git clone https://github.com/yourusername/aws-cloudguide.git
 cd aws-cloudguide
+
+pip install -r requirements.txt
+
+python 1_ingest_data.py
+python 2_create_embeddings.py
+
+streamlit run app.py --server.port 8501
