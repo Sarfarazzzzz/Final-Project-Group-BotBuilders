@@ -1,15 +1,16 @@
 import streamlit as st
 import time
-from backend import RAGBackend
+import uuid
+from backend1 import RAGBackend
 
 # Page Config
 st.set_page_config(
-    page_title="AWS Architect Assistant",
+    page_title="AWS CloudGuide",
     page_icon="☁️",
     layout="wide"
 )
 
-# Custom CSS for a professional look
+# Custom CSS
 st.markdown("""
 <style>
     .chat-message {
@@ -31,11 +32,10 @@ st.markdown("""
 # Title
 col1, col2 = st.columns([1, 6])
 with col1:
-    # Use HTML to render the image directly in the browser (bypassing the server backend)
     st.markdown('<img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" width="80">', unsafe_allow_html=True)
 with col2:
-    st.title("AWS Technical Architect Agent")
-    st.markdown("*Powered by Hybrid RAG (Dense Vectors + BM25) & Qwen-7B*")
+    st.title("AWS CloudGuide")
+    st.markdown("**Your Cloud Architecture Assistant**")
 
 
 # Initialize Backend (Cached)
@@ -54,6 +54,15 @@ with st.spinner("🚀 Booting up GPU Engine & Loading Knowledge Base..."):
     except Exception as e:
         st.error(f"Error Loading System: {e}")
         st.stop()
+
+# ========================================
+# Session management
+# ========================================
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+backend.set_session(st.session_state.session_id)
+# ========================================
 
 # Session State
 if "messages" not in st.session_state:
@@ -77,18 +86,34 @@ if prompt := st.chat_input("Ask a technical question (e.g., 'How do I create an 
 
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        full_response = ""
 
         with st.spinner("Thinking..."):
             try:
+                # Get response
                 response_text, source_docs = backend.generate_answer(prompt)
 
-                # Streaming Effect
-                for chunk in response_text.split():
-                    full_response += chunk + " "
-                    time.sleep(0.02)
-                    message_placeholder.markdown(full_response + "▌")
-                message_placeholder.markdown(full_response)
+                # Smart Streaming - preserves formatting!
+                full_response = ""
+
+                # Split by double newlines (paragraphs) to preserve structure
+                paragraphs = response_text.split('\n\n')
+
+                for para_idx, paragraph in enumerate(paragraphs):
+                    # Stream words in this paragraph
+                    words = paragraph.split()
+                    for word in words:
+                        full_response += word + " "
+                        time.sleep(0.01)  # Faster streaming
+                        message_placeholder.markdown(full_response + "▌")
+
+                    # Add paragraph break (except after last paragraph)
+                    if para_idx < len(paragraphs) - 1:
+                        full_response += "\n\n"
+                        time.sleep(0.05)
+                        message_placeholder.markdown(full_response + "▌")
+
+                # Show final version without cursor
+                message_placeholder.markdown(response_text)
 
                 # Format Sources
                 clean_sources = []
@@ -106,7 +131,7 @@ if prompt := st.chat_input("Ask a technical question (e.g., 'How do I create an 
 
                 st.session_state.messages.append({
                     "role": "assistant",
-                    "content": full_response,
+                    "content": response_text,
                     "sources": clean_sources
                 })
 
