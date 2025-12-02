@@ -132,7 +132,9 @@ cd aws-cloudguide
 
 pip install -r requirements.txt
 
-python 1_ingest_data.py
-python 2_create_embeddings.py
+python Data_Ingestion.py
+python Embeddings_Creation.py
+python backend.py
+python evaluate_model.py
 
 streamlit run app.py --server.port 8501
