@@ -1,0 +1,11 @@
+streamlit
+torch
+transformers
+accelerate
+bitsandbytes
+langchain
+langchain-community
+langchain-huggingface
+langchain-text-splitters
+chromadb
+rank_bm25
