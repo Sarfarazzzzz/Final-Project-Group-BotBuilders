@@ -149,7 +149,7 @@ python backend.py
 python evaluate_model.py
 ```
 
-### **5. Start the Streamlit Interface**
+### **6. Start the Streamlit Interface**
 ```bash
 streamlit run app.py --server.port 8501
 ```
