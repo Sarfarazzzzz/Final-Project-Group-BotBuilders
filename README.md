@@ -153,3 +153,8 @@ python evaluate_model.py
 ```bash
 streamlit run app.py --server.port 8501
 ```
+
+## 📄 License
+This project uses open-source libraries and the publicly available AWS Documentation dataset.
+Distributed under the MIT License.
+
