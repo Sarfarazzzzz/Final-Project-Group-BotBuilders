@@ -391,5 +391,5 @@ if __name__ == "__main__":
         print(response)
 
         print("\nSOURCES RETRIEVED:")
-        for j, doc in enumerate(sources[:2]):
+        for j, doc in enumerate(sources[:3]):
             print(f"[{j + 1}] Source: {doc.metadata.get('source', 'Unknown')}")
