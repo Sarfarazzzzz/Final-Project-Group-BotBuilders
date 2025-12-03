@@ -130,6 +130,8 @@ CloudGuide correctly infers:
 git clone https://github.com/yourusername/aws-cloudguide.git
 cd aws-cloudguide
 
+### **1. Clone the Repository**
+```bash
 pip install -r requirements.txt
 
 python Data_Ingestion.py
