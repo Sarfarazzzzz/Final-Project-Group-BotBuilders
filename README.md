@@ -75,21 +75,13 @@ Automatically transforms vague questions (e.g., *“How do I configure it?”*) 
 
 ---
 
-## 📐 Architecture Diagram
-
-> **Replace this section with your image**  
-> Example:  
-> `![Architecture Diagram](assets/aws_cloudguide_architecture.png)`
-
----
-
 ## 📊 System Evaluation
 
 CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an expert-reviewed "Golden Dataset."
 
 | Metric | Score | Meaning |
 |--------|--------|---------|
-| **Semantic Retrieval Score** | **0.74** | Retrieves the correct AWS documentation 74% of the time—over 2× more accurate than pure keyword search |
+| **Semantic Retrieval Score** | **0.75** | Retrieves the correct AWS documentation 75% of the time—over 2× more accurate than pure keyword search |
 | **Faithfulness** | **High** | Strict grounding ensures zero fabricated AWS specs |
 
 ---
