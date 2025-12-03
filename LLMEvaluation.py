@@ -1,16 +1,3 @@
-"""
-Comprehensive Multi-Dimensional Model Comparison
-=================================================
-
-Evaluates models on 6 dimensions:
-1. Accuracy  - Factual correctness
-2. Instruction Following  - Format compliance
-3. Context Adherence - Staying within context
-4. Conciseness - Appropriate verbosity
-5. Reasoning  - Complex problem solving
-6. Performance - Speed and efficiency
-"""
-
 import time
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -19,7 +6,6 @@ import re
 from collections import Counter
 import numpy as np
 
-# Test dimensions with specific test cases
 COMPREHENSIVE_TESTS = {
     "accuracy": [
         {
@@ -29,7 +15,6 @@ COMPREHENSIVE_TESTS = {
             "wrong": ["30 minutes", "60 minutes"]
         }
     ],
-
     "instruction_following": [
         {
             "query": "List the steps to create an S3 bucket",
@@ -39,7 +24,6 @@ COMPREHENSIVE_TESTS = {
             "should_not_have": ["bullet points", "- "]
         }
     ],
-
     "conciseness": [
         {
             "query": "What is S3?",
@@ -48,7 +32,6 @@ COMPREHENSIVE_TESTS = {
             "penalty_if_longer": True
         }
     ],
-
     "context_adherence": [
         {
             "query": "What are S3 storage classes?",
@@ -68,15 +51,12 @@ COMPREHENSIVE_TESTS = {
         }
     ],
 }
-
 MODELS = [
     ("Qwen 2.5 7B", "Qwen/Qwen2.5-7B-Instruct"),
     ("Llama 3.1 8B", "meta-llama/Meta-Llama-3.1-8B-Instruct"),
     ("Mistral 7B", "mistralai/Mistral-7B-Instruct-v0.3"),
     ("Gemma 2 9B", "google/gemma-2-9b-it"),
 ]
-
-
 class ComprehensiveEvaluator:
     """Multi-dimensional model evaluation."""
 
@@ -197,7 +177,6 @@ class ComprehensiveEvaluator:
 
 
 def comprehensive_test(model_name, model_id):
-    """Run comprehensive evaluation."""
     print(f"\n{'='*70}")
     print(f"COMPREHENSIVE EVALUATION: {model_name}")
     print('='*70)
@@ -225,12 +204,7 @@ def comprehensive_test(model_name, model_id):
 
         evaluator = ComprehensiveEvaluator()
         results = {}
-
-        # 1. ACCURACY TEST
-        print(f"\n{'─'*70}")
         print("1. ACCURACY EVALUATION")
-        print('─'*70)
-
         for test in COMPREHENSIVE_TESTS["accuracy"]:
             answer, gen_time, input_tokens, output_tokens = generate_answer(
                 model, tokenizer, test["query"], test["context"]
@@ -241,11 +215,7 @@ def comprehensive_test(model_name, model_id):
             print(f"Details: {details}")
             results["accuracy"] = {"score": score, "details": details, "gen_time": gen_time}
 
-        # 2. INSTRUCTION FOLLOWING
-        print(f"\n{'─'*70}")
         print("2. INSTRUCTION FOLLOWING")
-        print('─'*70)
-
         for test in COMPREHENSIVE_TESTS["instruction_following"]:
             answer, gen_time, _, _ = generate_answer(
                 model, tokenizer, test["query"], test["context"]
@@ -256,11 +226,7 @@ def comprehensive_test(model_name, model_id):
             print(f"Issues: {details['issues'] if details['issues'] else 'None'}")
             results["instruction_following"] = {"score": score, "details": details, "gen_time": gen_time}
 
-        # 3. CONCISENESS
-        print(f"\n{'─'*70}")
         print("3. CONCISENESS EVALUATION")
-        print('─'*70)
-
         for test in COMPREHENSIVE_TESTS["conciseness"]:
             answer, gen_time, _, _ = generate_answer(
                 model, tokenizer, test["query"], test["context"]
@@ -271,12 +237,7 @@ def comprehensive_test(model_name, model_id):
             print(f"Word count: {details['word_count']} (ideal: {details['ideal_range'][0]}-{details['ideal_range'][1]})")
             print(f"Verdict: {details['verdict']}")
             results["conciseness"] = {"score": score, "details": details, "gen_time": gen_time}
-
-        # 4. CONTEXT ADHERENCE
-        print(f"\n{'─'*70}")
         print("4. CONTEXT ADHERENCE")
-        print('─'*70)
-
         for test in COMPREHENSIVE_TESTS["context_adherence"]:
             answer, gen_time, _, _ = generate_answer(
                 model, tokenizer, test["query"], test["context"]
@@ -288,11 +249,7 @@ def comprehensive_test(model_name, model_id):
                 print(f" Violations: {details['violations']}")
             results["context_adherence"] = {"score": score, "details": details, "gen_time": gen_time}
 
-        # 5. REASONING
-        print(f"\n{'─'*70}")
         print("5. COMPLEX REASONING")
-        print('─'*70)
-
         for test in COMPREHENSIVE_TESTS["complex_reasoning"]:
             answer, gen_time, _, _ = generate_answer(
                 model, tokenizer, test["query"], test["context"]
@@ -302,12 +259,7 @@ def comprehensive_test(model_name, model_id):
             print(f"Score: {score:.0f}/100")
             print(f"Correct conclusion: {details['correct_conclusion']}")
             results["reasoning"] = {"score": score, "details": details, "gen_time": gen_time}
-
-        # 6. PERFORMANCE
-        print(f"\n{'─'*70}")
         print("6. PERFORMANCE METRICS")
-        print('─'*70)
-
         avg_time = np.mean([r.get("gen_time", 5) for r in results.values() if "gen_time" in r]) if results else 5
         perf = evaluator.measure_performance(avg_time, 100, 100)
         print(f"Avg generation time: {perf['gen_time']:.2f}s")
@@ -322,8 +274,6 @@ def comprehensive_test(model_name, model_id):
                 "tokens_per_sec": perf['tokens_per_sec']
             }
         }
-
-
         del model, tokenizer
         gc.collect()
         if torch.cuda.is_available():
@@ -337,10 +287,8 @@ def comprehensive_test(model_name, model_id):
         traceback.print_exc()
         return None
 
-
 def generate_answer(model, tokenizer, query, context):
     """Generate answer and measure performance."""
-    # Try with system role first
     messages = [
         {"role": "system", "content": f"Answer based on context:\n\n{context}"},
         {"role": "user", "content": query}
@@ -387,21 +335,13 @@ if __name__ == "__main__":
         if result:
             all_results[model_name] = result
 
-    # Final comparison table - just raw scores
-    print(f"\n{'='*70}")
     print("  MODEL COMPARISON - 6 DIMENSIONS")
-    print('='*70)
 
     model_names = list(all_results.keys())
-
-    # Print header
     print(f"\n{'Dimension':<25}", end="")
     for name in model_names:
         print(f"{name:<18}", end="")
     print()
-    print('─'*70)
-
-    # Print each dimension
     dimensions = ["accuracy", "instruction_following", "context_adherence",
                   "conciseness", "reasoning", "performance"]
 
