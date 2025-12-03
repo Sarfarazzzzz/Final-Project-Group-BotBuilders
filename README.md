@@ -129,14 +129,27 @@ CloudGuide correctly infers:
 ```bash
 git clone https://github.com/yourusername/aws-cloudguide.git
 cd aws-cloudguide
+```
 
-### **1. Clone the Repository**
+### **2. Install Dependencies**
 ```bash
 pip install -r requirements.txt
-
+```
+### **3. Initialize the Knowledge Base**
+```bash
 python Data_Ingestion.py
 python Embeddings_Creation.py
+```
+### **4. Launch the Backend Service**
+```bash
 python backend.py
+```
+### **5. (Optional) Evaluate the Model**
+```bash
 python evaluate_model.py
+```
 
+### **5. Start the Streamlit Interface**
+```bash
 streamlit run app.py --server.port 8501
+```
