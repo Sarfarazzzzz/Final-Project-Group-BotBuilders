@@ -14,7 +14,7 @@ def ingest_data():
     print("Starting Data Ingestion Pipeline...")
 
     # 1. Download the Dataset
-    # We use 'semihk1' because it contains 2025 AWS User Guide PDFs (High Quality)
+    
     print("Downloading `semihk1/aws-public-pdf-chunked-dataset`...")
     try:
         dataset = load_dataset("semihk1/aws-public-pdf-chunked-dataset", split="train")
@@ -24,36 +24,34 @@ def ingest_data():
         return
 
     # 2. Process and Format
-    # We need to standardize the format for our Vector DB (Chroma)
+    
     print("⚙️ Formatting data for RAG pipeline...")
 
     processed_count = 0
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         for entry in dataset:
-            # Extract fields (handling potential missing keys safely)
             text_content = entry.get('text', '').strip()
             source = entry.get('source', 'unknown_source')
             chunk_id = entry.get('chunk_id', -1)
 
-            # --- QUALITY FILTERS (ADD THIS) ---
 
-            # 1. Skip Table of Contents (Too many dots or specific headers)
+            # 1. Skip Table of Contents
             if "Table of Contents" in text_content or text_content.count(".....") > 3:
                 print(f"Skipping TOC: {chunk_id}")
                 continue
 
-            # 2. Skip Copyright/Legal boilerplate (Low value)
+            # 2. Skip Copyright/Legal boilerplate
             if "All rights reserved" in text_content and len(text_content) < 300:
                 print(f"Skipping Copyright: {chunk_id}")
                 continue
 
-            # 3. Skip very short chunks (Usually page footers or headers)
+            # 3. Skip very short chunks
             if len(text_content) < 100:
                 continue
 
             # Create a clean JSON object
             doc_object = {
-                "id": f"{source}_{chunk_id}",  # Unique ID for the database
+                "id": f"{source}_{chunk_id}",
                 "text": text_content,
                 "metadata": {
                     "source": source,
@@ -61,13 +59,12 @@ def ingest_data():
                 }
             }
 
-            # Write to JSONL (JSON Lines) - Best for streaming large data
+            # Write to JSONL (JSON Lines)
             f.write(json.dumps(doc_object) + '\n')
             processed_count += 1
 
     print(f"Success! Processed {processed_count} high-quality chunks.")
     print(f" Data saved to: {OUTPUT_FILE}")
-
 
 if __name__ == "__main__":
     ingest_data()
