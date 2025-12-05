@@ -89,6 +89,7 @@ CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an
 ## Demo
 
 [![Watch the Demo](Screenshot.png)](https://drive.google.com/file/d/1SGOnj8RMekCZn5cOxIb352aaSumNg1ai/view?usp=drive_link)
+**Click the image above to watch the demo video**
 
 ---
 
