@@ -88,25 +88,7 @@ CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an
 
 ## Demo
 
-[![Watch the Demo Here](Screenshot.png)](https://drive.google.com/file/d/1SGOnj8RMekCZn5cOxIb352aaSumNg1ai/view?usp=drive_link)
-
-### **1. Architectural Reasoning**
-**Q:** “What is the difference between a Scan and a Query in DynamoDB?”  
-**A:** Explains partition key dependency, table-wide Scan behavior, and efficiency.  
-`[Source: dynamodb-dg.pdf]`
-
-### **2. Full Documentation Coverage**
-“List all S3 storage classes.”  
-Returns **all nine**, including:  
-- S3 Express One Zone  
-- Intelligent-Tiering  
-- Glacier Flexible Retrieval  
-
-### **3. Contextual Memory**
-**User:** “What is the difference between an IAM User and an IAM Role?”  
-**Follow-up:** “Which one provides temporary credentials?”  
-CloudGuide correctly infers:  
-**IAM Roles → temporary credentials**
+[![Watch the Demo](Screenshot.png)](https://drive.google.com/file/d/1SGOnj8RMekCZn5cOxIb352aaSumNg1ai/view?usp=drive_link)
 
 ---
 
