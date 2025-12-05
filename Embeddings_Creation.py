@@ -15,7 +15,6 @@ BM25_FILE = "db/bm25_index.pkl"
 
 
 def create_embeddings():
-    # Check for GPU
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Starting Embedding Pipeline on device: {device.upper()}")
 
@@ -25,7 +24,6 @@ def create_embeddings():
     # 1. Load the Cleaned Data
     print("PAGE 1: Loading Data...")
     docs = []
-    # Check if file exists
     if not os.path.exists(INPUT_FILE):
         print(f"Error: Input file {INPUT_FILE} not found. Did you run the ingestion script?")
         return
@@ -33,7 +31,6 @@ def create_embeddings():
     with open(INPUT_FILE, 'r', encoding='utf-8') as f:
         for line in f:
             data = json.loads(line)
-            # Create a LangChain 'Document' object
             doc = Document(
                 page_content=data['text'],
                 metadata=data['metadata']
@@ -43,7 +40,6 @@ def create_embeddings():
     print(f"Loaded {len(docs)} raw pages.")
 
     # 2. Split Large Pages into Precision Chunks
-    # We split by 'headers' and 'paragraphs' to keep context intact
     print("PAGE 2: Splitting text into precision chunks...")
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -58,14 +54,12 @@ def create_embeddings():
     print("PAGE 3: Generating Vectors (This uses the GPU)...")
     print("   -> Loading BAAI/bge-m3 model (this may take a moment)...")
 
-    # We use BGE-M3, a state-of-the-art model for retrieval
     embedding_model = HuggingFaceEmbeddings(
         model_name="BAAI/bge-m3",
         model_kwargs={"device": device},
         encode_kwargs={"normalize_embeddings": True}
     )
 
-    # This process will take 5-15 mins depending on dataset size
     vector_db = Chroma.from_documents(
         documents=splitted_docs,
         embedding=embedding_model,
@@ -76,18 +70,15 @@ def create_embeddings():
     # 4. Create BM25 Index (The Keyword Index)
     print("PAGE 4: Building BM25 Keyword Index...")
 
-    # Simple tokenization for BM25
     tokenized_corpus = [doc.page_content.lower().split() for doc in splitted_docs]
     bm25 = BM25Okapi(tokenized_corpus)
 
     # Save the BM25 index AND the raw docs
-    # (We need the raw docs to map the BM25 'index number' back to text later)
     bm25_data = {
         "pipeline": bm25,
         "documents": splitted_docs
     }
 
-    # Ensure directory exists
     os.makedirs(os.path.dirname(BM25_FILE), exist_ok=True)
 
     with open(BM25_FILE, "wb") as f:

@@ -10,13 +10,11 @@ warnings.filterwarnings("ignore")
 
 # 1. Setup
 print(" Loading Evaluator...")
-# We use the same embedding model you used for the DB to judge similarity
 judge_model = SentenceTransformer("BAAI/bge-m3")
 rag_system = RAGBackend()
 rag_system.load_resources()
 
 # 2. Golden Dataset
-# 2. The Golden Dataset (5 Questions covering Core Services)
 test_questions = [
     # Q1: Compute (Lambda) - Fact
     "What is the maximum execution time for an AWS Lambda function?",
@@ -34,7 +32,7 @@ test_questions = [
     "What is the AWS root user?"
 ]
 
-# The "Answer Key" (You provide this truth)
+# The "Answer Key"
 ground_truths = [
     # A1
     "The maximum execution time for an AWS Lambda function is 15 minutes or 900 seconds.",
@@ -57,13 +55,11 @@ scores = []
 
 for i, q in enumerate(test_questions):
     print(f"   Asking: {q}")
-    # Run RAG
     response, source_docs = rag_system.generate_answer(q)
 
     # Combine all retrieved text into one big string context
     retrieved_text = " ".join([doc.page_content for doc in source_docs])
 
-    # --- THE INDUSTRY STANDARD METRIC: COSINE SIMILARITY ---
     # 1. Vectorize the Ground Truth (The Ideal Answer)
     truth_vec = judge_model.encode([ground_truths[i]])
 
@@ -74,7 +70,6 @@ for i, q in enumerate(test_questions):
     similarity_score = cosine_similarity(truth_vec, context_vec)[0][0]
     scores.append(similarity_score)
 
-    # Verdict
     status = "PASS" if similarity_score > 0.55 else "FAIL"
     print(f"   -> Semantic Score: {similarity_score:.4f} | {status}")
     print(f"   -> Model Answer: {response[:100]}...")
