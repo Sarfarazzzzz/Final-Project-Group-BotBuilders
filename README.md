@@ -88,7 +88,7 @@ CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an
 
 ## Demo Scenarios
 
-[![Watch the Demo](path/to/your/screenshot.png)](YOUR_GOOGLE_DRIVE_LINK_HERE)
+[![Watch the Demo Here !](screenshot.png)]([YOUR_GOOGLE_DRIVE_LINK_HERE](https://drive.google.com/file/d/1SGOnj8RMekCZn5cOxIb352aaSumNg1ai/view?usp=drive_link))
 
 ### **1. Architectural Reasoning**
 **Q:** “What is the difference between a Scan and a Query in DynamoDB?”  
