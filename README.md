@@ -15,31 +15,31 @@ CloudGuide is engineered for reliability, enterprise-grade reasoning, and strict
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 🔍 Hybrid Search Engine (Vector + Keyword)
+### Hybrid Search Engine (Vector + Keyword)
 - **Dense semantic retrieval** using BAAI/bge-m3 embeddings  
 - **Sparse BM25 search** for precise acronym- and error-code-level matching  
 - Combined using **Reciprocal Rank Fusion (RRF)** for maximal precision
 
-### 🧠 Cognitive Query Rewriting
+### Cognitive Query Rewriting
 Automatically transforms vague questions (e.g., *“How do I configure it?”*) into well-formed, context-aware queries using conversational memory.
 
-### 🏗️ Enterprise-Grade Reasoning
+### Enterprise-Grade Reasoning
 - Powered by **Qwen-2.5-7B-Instruct**  
 - Runs locally in **FP16 with single GPU**  
 - Designed for architectural comparisons, trade-offs, best practices, and detailed explanations
 
-### 🛡️ Hallucination Guardrails
+### Hallucination Guardrails
 - Model **must cite sourced documents** for every technical claim  
 - Falls back to **"No relevant documentation found"** when unmatched  
 - Eliminates non-verifiable output
 
 ---
 
-## 🛠️ System Architecture
+## System Architecture
 
-### 🔧 Technology Stack
+### Technology Stack
 
 | Component | Technology |
 |----------|------------|
@@ -53,7 +53,7 @@ Automatically transforms vague questions (e.g., *“How do I configure it?”*) 
 
 ---
 
-## ⚙️ RAG Pipeline Overview
+## RAG Pipeline Overview
 
 ### **1. Ingestion & Indexing**
 - AWS PDF guides → cleaned, chunked (1000 chars w/ overlap)  
@@ -75,7 +75,7 @@ Automatically transforms vague questions (e.g., *“How do I configure it?”*) 
 
 ---
 
-## 📊 System Evaluation
+## System Evaluation
 
 CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an expert-reviewed "Golden Dataset."
 
@@ -86,7 +86,9 @@ CloudGuide was benchmarked using a **Semantic Similarity Evaluation** against an
 
 ---
 
-## 🧪 Demo Scenarios
+## Demo Scenarios
+
+[![Watch the Demo](path/to/your/screenshot.png)](YOUR_GOOGLE_DRIVE_LINK_HERE)
 
 ### **1. Architectural Reasoning**
 **Q:** “What is the difference between a Scan and a Query in DynamoDB?”  
@@ -108,7 +110,7 @@ CloudGuide correctly infers:
 
 ---
 
-## 🔧 Installation & Setup
+## Installation & Setup
 
 ### **Prerequisites**
 - Python **3.10+**  
@@ -146,7 +148,7 @@ python evaluate_model.py
 streamlit run app.py --server.port 8501
 ```
 
-## 📄 License
+## License
 This project uses open-source libraries and the publicly available AWS Documentation dataset.
 Distributed under the MIT License.
 
